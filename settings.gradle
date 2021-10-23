@@ -1,0 +1,3 @@
+rootProject.name = "IconAdapter"
+include ':app'
+include ':IconAdapter'
