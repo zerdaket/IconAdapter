@@ -34,162 +34,125 @@ class IconAdapter {
 
 
         // TL
-        var keepGoing = true
         run {
-            var i = 0
-            while (i < height && keepGoing) {
-                var j = 0
-                while (j < width && keepGoing) {
+            for (i in 0 until height) {
+                for (j in 0 until width) {
                     alpha = Color.alpha(pixels[width * i + j])
                     if (alpha > alphaThreshold) {
                         top = i
                         tlPoint[0] = j
                         tlPoint[1] = i
-                        keepGoing = false
+                        return@run
                     }
-                    j++
                 }
-                i++
             }
         }
 
         // LT
-        keepGoing = true
         run {
-            var i = 0
-            while (i < width && keepGoing) {
-                var j = 0
-                while (j < height && keepGoing) {
+            for (i in 0 until width) {
+                for (j in 0 until height) {
                     alpha = Color.alpha(pixels[width * j + i])
                     if (alpha > alphaThreshold) {
                         left = i
                         ltPoint[0] = i
                         ltPoint[1] = j
-                        keepGoing = false
+                        return@run
                     }
-                    j++
                 }
-                i++
             }
         }
 
         // LB
-        keepGoing = true
         run {
-            var i = 0
-            while (i < width && keepGoing) {
-                var j = height - 1
-                while (j >= 0 && keepGoing) {
+            for (i in 0 until width) {
+                for (j in height - 1 downTo 0) {
                     alpha = Color.alpha(pixels[width * j + i])
                     if (alpha > alphaThreshold) {
                         left = min(left, i)
                         lbPoint[0] = i
                         lbPoint[1] = j
-                        keepGoing = false
+                        return@run
                     }
-                    j--
                 }
-                i++
             }
         }
 
         // BL
-        keepGoing = true
         run {
-            var i = height - 1
-            while (i >= 0 && keepGoing) {
-                var j = 0
-                while (j < width && keepGoing) {
+            for (i in height - 1 downTo 0) {
+                for (j in 0 until width) {
                     alpha = Color.alpha(pixels[width * i + j])
                     if (alpha > alphaThreshold) {
                         bottom = i
                         blPoint[0] = j
                         blPoint[1] = i
-                        keepGoing = false
+                        return@run
                     }
-                    j++
                 }
-                i--
             }
         }
 
         // BR
-        keepGoing = true
         run {
-            var i = height - 1
-            while (i >= 0 && keepGoing) {
-                var j = width - 1
-                while (j >= 0 && keepGoing) {
+            for (i in height - 1 downTo 0) {
+                for (j in width - 1 downTo 0) {
                     alpha = Color.alpha(pixels[width * i + j])
                     if (alpha > alphaThreshold) {
                         bottom = max(bottom, i)
                         brPoint[0] = j
                         brPoint[1] = i
-                        keepGoing = false
+                        return@run
                     }
-                    j--
                 }
-                i--
             }
         }
 
         // RB
-        keepGoing = true
         run {
-            var i = width - 1
-            while (i >= 0 && keepGoing) {
-                var j = height - 1
-                while (j >= 0 && keepGoing) {
+            for (i in width - 1 downTo 0) {
+                for (j in height - 1 downTo 0) {
                     alpha = Color.alpha(pixels[width * j + i])
                     if (alpha > alphaThreshold) {
                         right = i
                         rbPoint[0] = i
                         rbPoint[1] = j
-                        keepGoing = false
+                        return@run
                     }
-                    j--
                 }
-                i--
             }
         }
 
         // RT
-        keepGoing = true
         run {
-            var i = width - 1
-            while (i >= 0 && keepGoing) {
-                var j = 0
-                while (j < height && keepGoing) {
+            for (i in width - 1 downTo 0) {
+                for (j in 0 until height) {
                     alpha = Color.alpha(pixels[width * j + i])
                     if (alpha > alphaThreshold) {
                         right = max(right, i)
                         rtPoint[0] = i
                         rtPoint[1] = j
-                        keepGoing = false
+                        return@run
                     }
-                    j++
                 }
-                i--
             }
         }
 
         // TR
-        keepGoing = true
-        var i = 0
-        while (i < height && keepGoing) {
-            var j = width - 1
-            while (j >= 0 && keepGoing) {
-                alpha = Color.alpha(pixels[width * i + j])
-                if (alpha > alphaThreshold) {
-                    top = min(top, i)
-                    trPoint[0] = j
-                    trPoint[1] = i
-                    keepGoing = false
+        run {
+            for (i in 0 until height) {
+                for (j in width - 1 downTo 0) {
+                    alpha = Color.alpha(pixels[width * i + j])
+                    if (alpha > alphaThreshold) {
+                        top = min(top, i)
+                        trPoint[0] = j
+                        trPoint[1] = i
+                        return@run
+                    }
                 }
-                j--
             }
-            i++
         }
+
         val lt2tl = calculateDistanceOfTwoPoints(ltPoint, tlPoint)
         val rt2tr = calculateDistanceOfTwoPoints(rtPoint, trPoint)
         val lb2bl = calculateDistanceOfTwoPoints(lbPoint, blPoint)
