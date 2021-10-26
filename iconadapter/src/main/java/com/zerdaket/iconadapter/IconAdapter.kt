@@ -1,6 +1,7 @@
 package com.zerdaket.iconadapter
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
 import kotlin.math.*
@@ -12,6 +13,7 @@ import kotlin.math.*
 class IconAdapter {
 
     private val alphaThreshold = 100
+    private val factor = 0.8f
 
     private fun calculateOutlineRect(bitmap: Bitmap, rect: Rect): Boolean {
         val pixels = IntArray(bitmap.width * bitmap.height)
@@ -164,10 +166,10 @@ class IconAdapter {
         val standard = distance / 2
         val needScale: Boolean
         if (lt2tl < standard && rt2tr < standard && lb2bl < standard && rb2br < standard) {
-            rect[left, top, right] = bottom
+            rect.set(left, top, right, bottom)
             needScale = false
         } else {
-            rect[0, 0, width] = height
+            rect.set(0, 0, width, height)
             needScale = true
         }
         return needScale
@@ -177,6 +179,26 @@ class IconAdapter {
         val xDistance = abs(pointA[0] - pointB[0])
         val yDistance = abs(pointA[1] - pointB[1])
         return sqrt(xDistance.toDouble().pow(2.0) + yDistance.toDouble().pow(2.0)).toInt()
+    }
+
+    private fun cropOutline(dst: Bitmap): Bitmap {
+        val rect = Rect()
+        val needScale = calculateOutlineRect(dst, rect)
+        return if (needScale) {
+            val width = dst.width
+            val height = dst.height
+            val scaleWidth = width * factor
+            val scaleHeight = height * factor
+            val bitmap = Bitmap.createBitmap(dst.width, dst.height, Bitmap.Config.ARGB_8888)
+            val scaleBitmap = Bitmap.createScaledBitmap(bitmap, scaleWidth.toInt(), scaleHeight.toInt(), false)
+            val dstX = (width - scaleWidth) / 2
+            val dstY = (height - scaleHeight) / 2
+            val canvas = Canvas(bitmap)
+            canvas.drawBitmap(scaleBitmap, dstX, dstY, null)
+            bitmap
+        } else {
+            Bitmap.createBitmap(dst, rect.left, rect.top, rect.width(), rect.height())
+        }
     }
 
 }
