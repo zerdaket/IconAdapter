@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import kotlin.math.*
 
 /**
@@ -198,6 +200,20 @@ class IconAdapter {
             bitmap
         } else {
             Bitmap.createBitmap(dst, rect.left, rect.top, rect.width(), rect.height())
+        }
+    }
+
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
+        return if (drawable is BitmapDrawable) {
+            drawable.bitmap
+        } else {
+            val width = drawable.intrinsicWidth.coerceAtLeast(1)
+            val height = drawable.intrinsicHeight.coerceAtLeast(1)
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            bitmap
         }
     }
 
