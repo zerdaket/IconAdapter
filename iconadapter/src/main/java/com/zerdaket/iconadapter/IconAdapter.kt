@@ -12,8 +12,9 @@ import kotlin.math.*
  * @author zerdaket
  * @date 2021/10/25 12:47 上午
  */
-class IconAdapter {
+class IconAdapter private constructor(builder: Builder) {
 
+    private val target = builder.target
     private val alphaThreshold = 100
     private val factor = 0.8f
 
@@ -183,15 +184,15 @@ class IconAdapter {
         return sqrt(xDistance.toDouble().pow(2.0) + yDistance.toDouble().pow(2.0)).toInt()
     }
 
-    private fun cropOutline(dst: Bitmap): Bitmap {
+    fun adapt(): Bitmap {
         val rect = Rect()
-        val needScale = calculateOutlineRect(dst, rect)
+        val needScale = calculateOutlineRect(target, rect)
         return if (needScale) {
-            val width = dst.width
-            val height = dst.height
+            val width = target.width
+            val height = target.height
             val scaleWidth = width * factor
             val scaleHeight = height * factor
-            val bitmap = Bitmap.createBitmap(dst.width, dst.height, Bitmap.Config.ARGB_8888)
+            val bitmap = Bitmap.createBitmap(target.width, target.height, Bitmap.Config.ARGB_8888)
             val scaleBitmap = Bitmap.createScaledBitmap(bitmap, scaleWidth.toInt(), scaleHeight.toInt(), false)
             val dstX = (width - scaleWidth) / 2
             val dstY = (height - scaleHeight) / 2
@@ -199,22 +200,34 @@ class IconAdapter {
             canvas.drawBitmap(scaleBitmap, dstX, dstY, null)
             bitmap
         } else {
-            Bitmap.createBitmap(dst, rect.left, rect.top, rect.width(), rect.height())
+            Bitmap.createBitmap(target, rect.left, rect.top, rect.width(), rect.height())
         }
     }
 
-    private fun drawableToBitmap(drawable: Drawable): Bitmap {
-        return if (drawable is BitmapDrawable) {
-            drawable.bitmap
-        } else {
-            val width = drawable.intrinsicWidth.coerceAtLeast(1)
-            val height = drawable.intrinsicHeight.coerceAtLeast(1)
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
-            bitmap
-        }
-    }
+    class Builder {
 
+        internal val target: Bitmap
+
+        constructor(src: Bitmap) {
+            target = src
+        }
+
+        constructor(src: Drawable) {
+            target = if (src is BitmapDrawable) {
+                src.bitmap
+            } else {
+                val width = src.intrinsicWidth.coerceAtLeast(1)
+                val height = src.intrinsicHeight.coerceAtLeast(1)
+                val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                src.setBounds(0, 0, canvas.width, canvas.height)
+                src.draw(canvas)
+                bitmap
+            }
+        }
+
+        fun build() = IconAdapter(this)
+
+        fun adapt() = build().adapt()
+    }
 }
