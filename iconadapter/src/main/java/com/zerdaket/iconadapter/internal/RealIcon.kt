@@ -1,9 +1,6 @@
 package com.zerdaket.iconadapter.internal
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Rect
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.zerdaket.iconadapter.AdaptiveIcon
@@ -212,16 +209,22 @@ class RealIcon: AdaptiveIcon {
         val rect = Rect()
         val needScale = calculateOutlineRect(target, rect)
         return if (needScale) {
-            val width = target.width
-            val height = target.height
+            val width = rect.width()
+            val height = rect.height()
             val scaleWidth = width * factor
             val scaleHeight = height * factor
+
             val bitmap = Bitmap.createBitmap(target.width, target.height, Bitmap.Config.ARGB_8888)
-            val scaleBitmap = Bitmap.createScaledBitmap(bitmap, scaleWidth.toInt(), scaleHeight.toInt(), false)
+            val canvas = Canvas(bitmap)
+
             val dstX = (width - scaleWidth) / 2
             val dstY = (height - scaleHeight) / 2
-            val canvas = Canvas(bitmap)
-            canvas.drawBitmap(scaleBitmap, dstX, dstY, null)
+
+            val matrix = Matrix()
+            matrix.preTranslate(dstX, dstY)
+            matrix.preScale(factor, factor)
+
+            canvas.drawBitmap(target, matrix, null)
             bitmap
         } else {
             Bitmap.createBitmap(target, rect.left, rect.top, rect.width(), rect.height())
