@@ -17,7 +17,6 @@ class RealIcon: AdaptiveIcon {
     private val adapter: IconAdapter
 
     private val alphaThreshold = 100
-    private val factor = 0.8f
 
     constructor(adapter: IconAdapter, src: Bitmap) {
         this.adapter = adapter
@@ -188,15 +187,15 @@ class RealIcon: AdaptiveIcon {
         val pointB = intArrayOf(side / 2, 0)
         val distance = calculateDistanceOfTwoPoints(pointA, pointB)
         val standard = distance / 2
-        val needScale: Boolean
+        val isRectangle: Boolean
         if (lt2tl < standard && rt2tr < standard && lb2bl < standard && rb2br < standard) {
             rect.set(left, top, right, bottom)
-            needScale = false
+            isRectangle = true
         } else {
             rect.set(0, 0, width, height)
-            needScale = true
+            isRectangle = false
         }
-        return needScale
+        return isRectangle
     }
 
     private fun calculateDistanceOfTwoPoints(pointA: IntArray, pointB: IntArray): Int {
@@ -205,30 +204,55 @@ class RealIcon: AdaptiveIcon {
         return sqrt(xDistance.toDouble().pow(2.0) + yDistance.toDouble().pow(2.0)).toInt()
     }
 
-    override fun adapt(): Bitmap {
-        val rect = Rect()
-        val needScale = calculateOutlineRect(target, rect)
-        return if (needScale) {
-            val width = rect.width()
-            val height = rect.height()
-            val scaleWidth = width * factor
-            val scaleHeight = height * factor
+    /**
+     * 居中缩放
+     */
+    private fun scale(canvas: Canvas, factor: Float) {
+        val width = canvas.width
+        val height = canvas.height
+        val scaleWidth = width * factor
+        val scaleHeight = height * factor
+        val dstX = (width - scaleWidth) / 2
+        val dstY = (height - scaleHeight) / 2
 
-            val bitmap = Bitmap.createBitmap(target.width, target.height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
+        val matrix = Matrix()
+        matrix.preTranslate(dstX, dstY)
+        matrix.preScale(factor, factor)
 
-            val dstX = (width - scaleWidth) / 2
-            val dstY = (height - scaleHeight) / 2
-
-            val matrix = Matrix()
-            matrix.preTranslate(dstX, dstY)
-            matrix.preScale(factor, factor)
-
-            canvas.drawBitmap(target, matrix, null)
-            bitmap
-        } else {
-            Bitmap.createBitmap(target, rect.left, rect.top, rect.width(), rect.height())
-        }
+        canvas.drawBitmap(target, matrix, null)
     }
+
+    /**
+     * 裁剪
+     */
+    private fun crop(canvas: Canvas, rect: Rect) {
+        canvas.drawBitmap(target, Rect(rect.left, rect.top, rect.right, rect.bottom), Rect(0, 0, rect.width(), rect.height()), null)
+    }
+
+    private fun create(): Bitmap {
+        val canvas: Canvas
+        val result: Bitmap
+        if (adapter.factor == 1f) {
+            val rect = Rect()
+            val isRectangle = calculateOutlineRect(target, rect)
+            result = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888)
+            canvas = Canvas(result)
+
+            if (isRectangle) {
+                crop(canvas, rect)
+            } else {
+                scale(canvas, adapter.nonRectangleFactor)
+            }
+        } else {
+            result = Bitmap.createBitmap(target.width, target.height, Bitmap.Config.ARGB_8888)
+            canvas = Canvas(result)
+
+            scale(canvas, adapter.factor)
+        }
+
+        return result
+    }
+
+    override fun adapt(): Bitmap = create()
 
 }
