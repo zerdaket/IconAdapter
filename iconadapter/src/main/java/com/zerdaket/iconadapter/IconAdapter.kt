@@ -1,9 +1,12 @@
 package com.zerdaket.iconadapter
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
+import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import com.zerdaket.iconadapter.internal.RealIcon
+import com.zerdaket.iconadapter.internal.outline.RectangleOutline
 
 /**
  * @author zerdaket
@@ -13,6 +16,10 @@ class IconAdapter private constructor(builder: Builder) {
 
     val factor = builder.factor
     val nonRectangleFactor = builder.nonRectangleFactor
+    val backgroundColor = builder.backgroundColor
+    val strokeWidth = builder.strokeWidth
+    val strokeColor = builder.strokeColor
+    val outline: Outline = builder.outline
 
     fun newIcon(src: Bitmap): AdaptiveIcon = RealIcon(this, src)
 
@@ -22,6 +29,10 @@ class IconAdapter private constructor(builder: Builder) {
 
         var factor = 1f
         var nonRectangleFactor = 0.8f
+        var backgroundColor = Color.TRANSPARENT
+        var strokeWidth = 0f
+        var strokeColor = Color.BLACK
+        var outline: Outline = RectangleOutline()
 
         fun scale(@FloatRange(from = 0.0, to = 1.0) value: Float) = apply {
             factor = value
@@ -29,6 +40,22 @@ class IconAdapter private constructor(builder: Builder) {
 
         fun nonRectangleScale(@FloatRange(from = 0.0, to = 1.0) value: Float) = apply {
             nonRectangleFactor = value
+        }
+
+        fun backgroundColor(@ColorInt value: Int) = apply {
+            backgroundColor = value
+        }
+
+        fun strokeWidth(value: Float) = apply {
+            strokeWidth = value
+        }
+
+        fun strokeColor(@ColorInt value: Int) = apply {
+            strokeColor = value
+        }
+
+        fun outline(value: Outline) = apply {
+            outline = value
         }
 
         fun build() = IconAdapter(this)

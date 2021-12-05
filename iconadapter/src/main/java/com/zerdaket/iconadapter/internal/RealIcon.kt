@@ -232,9 +232,13 @@ class RealIcon: AdaptiveIcon {
     private fun create(): Bitmap {
         val canvas: Canvas
         val result: Bitmap
+        val w: Float
+        val h: Float
         if (adapter.factor == 1f) {
             val rect = Rect()
             val isRectangle = calculateOutlineRect(target, rect)
+            w = rect.width().toFloat()
+            h = rect.height().toFloat()
             result = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888)
             canvas = Canvas(result)
 
@@ -244,11 +248,29 @@ class RealIcon: AdaptiveIcon {
                 scale(canvas, adapter.nonRectangleFactor)
             }
         } else {
+            w = target.width.toFloat()
+            h = target.height.toFloat()
             result = Bitmap.createBitmap(target.width, target.height, Bitmap.Config.ARGB_8888)
             canvas = Canvas(result)
 
             scale(canvas, adapter.factor)
         }
+
+        val path = Path()
+        adapter.outline.draw(path, w, h, adapter.strokeWidth)
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        if (adapter.strokeWidth > 0f) {
+            paint.color = adapter.strokeColor
+            paint.strokeWidth = adapter.strokeWidth
+            paint.style = Paint.Style.STROKE
+            canvas.drawPath(path, paint)
+        }
+
+        paint.strokeWidth = 0f
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+        paint.style = Paint.Style.FILL
+        canvas.drawPath(path, paint)
 
         return result
     }
