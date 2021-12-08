@@ -27,12 +27,12 @@ class IconAdapter private constructor(builder: Builder) {
 
     class Builder {
 
-        var factor = 1f
-        var nonRectangleFactor = 0.8f
-        var backgroundColor = Color.TRANSPARENT
-        var strokeWidth = 0f
-        var strokeColor = Color.BLACK
-        var outline: Outline = RectangleOutline()
+        internal var factor = 1f
+        internal var nonRectangleFactor = 0.8f
+        internal var backgroundColor = Color.TRANSPARENT
+        internal var strokeWidth = 0f
+        internal var strokeColor = Color.BLACK
+        internal var outline: Outline = RectangleOutline()
 
         fun scale(@FloatRange(from = 0.0, to = 1.0) value: Float) = apply {
             factor = value

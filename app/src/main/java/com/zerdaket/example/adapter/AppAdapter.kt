@@ -29,7 +29,7 @@ class AppAdapter: RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val info = appList?.get(holder.bindingAdapterPosition) ?: return
-        holder.imageView.setImageDrawable(info.icon)
+        holder.imageView.setImageBitmap(info.icon)
         holder.textView.text = info.name
     }
 
